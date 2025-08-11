@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simple To-Do App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #1b885e;
+      padding: 2rem;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .task-form {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    input, button {
+      padding: 0.6rem;
+      font-size: 1rem;
+    }
+
+    input[type="text"] {
+      flex: 2;
+    }
+
+    input[type="datetime-local"] {
+      flex: 1.5;
+    }
+
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #fff;
+      padding: 0.7rem;
+      margin-bottom: 0.5rem;
+      border-left: 5px solid #007bff;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .task-actions button {
+      padding: 0.2rem 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .datetime {
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h2>📝 To-Do List App</h2>
+
+  <div class="task-form">
+    <input type="text" id="taskInput" placeholder="Enter task..." />
+    <input type="datetime-local" id="datetimeInput" />
+    <button onclick="addTask()">Add Task</button>
+  </div>
+
+  <ul id="taskList"></ul>
+
+  <script>
+    let tasks = [];
+
+    function addTask() {
+      const taskText = document.getElementById('taskInput').value.trim();
+      const datetime = document.getElementById('datetimeInput').value;
+      if (taskText === '') return;
+
+      const task = {
+        id: Date.now(),
+        text: taskText,
+        datetime,
+        completed: false
+      };
+
+      tasks.push(task);
+      renderTasks();
+      document.getElementById('taskInput').value = '';
+      document.getElementById('datetimeInput').value = '';
+    }
+
+    function renderTasks() {
+      const taskList = document.getElementById('taskList');
+      taskList.innerHTML = '';
+
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.className = task.completed ? 'completed' : '';
+
+        const taskContent = document.createElement('div');
+        taskContent.textContent = task.text;
+        li.appendChild(taskContent);
+
+        if (task.datetime) {
+          const datetimeEl = document.createElement('div');
+          datetimeEl.className = 'datetime';
+          datetimeEl.textContent = `🕒 ${new Date(task.datetime).toLocaleString()}`;
+          li.appendChild(datetimeEl);
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'task-actions';
+
+        const completeBtn = document.createElement('button');
+        completeBtn.textContent = task.completed ? 'Undo' : 'Complete';
+        completeBtn.onclick = () => toggleComplete(task.id);
+        actions.appendChild(completeBtn);
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => editTask(task.id);
+        actions.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteTask(task.id);
+        actions.appendChild(deleteBtn);
+
+        li.appendChild(actions);
+        taskList.appendChild(li);
+      });
+    }
+
+    function toggleComplete(id) {
+      tasks = tasks.map(task => {
+        if (task.id === id) task.completed = !task.completed;
+        return task;
+      });
+      renderTasks();
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      const newText = prompt('Edit task:', task.text);
+      const newDatetime = prompt('Edit datetime (YYYY-MM-DDTHH:MM):', task.datetime);
+
+      if (newText !== null) task.text = newText.trim();
+      if (newDatetime !== null) task.datetime = newDatetime;
+      renderTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      renderTasks();
+    }
+  </script>
+</body>
+</html>
